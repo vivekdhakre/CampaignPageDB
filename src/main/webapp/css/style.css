@@ -15,9 +15,9 @@
     margin: 0
 }
 
-.parallax-container {
-    height: 300px;
-}
+/*.parallax-container {*/
+    /*height: 300px;*/
+/*}*/
 
 .card.offer-card .card-content {
     float: left;
