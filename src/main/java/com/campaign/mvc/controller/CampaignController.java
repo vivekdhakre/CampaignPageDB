@@ -37,13 +37,13 @@ public class CampaignController {
 
 
     @RequestMapping(value = "/c/{cid}")
-    public String campaign(@PathVariable long cid, @RequestParam(value = "type" ,required = false) String type, @RequestParam(value="id",required = false) String id, HttpServletRequest request) throws Exception {
-        return "redirect:"+Constants.getServerPath(request)+"/cl/"+cid+"?type"+type+"&id="+URLEncoder.encode(id!=null?id:"","UTF-8");
+    public String campaign(@PathVariable long cid, @RequestParam(value = "type" ,required = false) String type, @RequestParam(value="id",required = false) String id,@RequestParam(value="uuid",required = false) String uuid, HttpServletRequest request) throws Exception {
+        return "redirect:"+Constants.getServerPath(request)+"/cl/"+cid+"?type"+type+"&id="+URLEncoder.encode(id!=null?id:"","UTF-8")+"&uuid="+URLEncoder.encode(uuid!=null?uuid:"","UTF-8");
     }
 
 
     @RequestMapping(value = "/cl/{cid}",method = RequestMethod.GET)
-    public String campaignLocation(@PathVariable long cid, @RequestParam(value = "type" ,required = false) String type, @RequestParam(value="id",required = false) String id, HttpSession session,SessionStatus sessionStatus, HttpServletRequest request){
+    public String campaignLocation(@PathVariable long cid, @RequestParam(value = "type" ,required = false) String type, @RequestParam(value="id",required = false) String id,@RequestParam(value="uuid",required = false) String uuid, HttpSession session,SessionStatus sessionStatus, HttpServletRequest request){
 
         String resp = null;
         String ip = request.getHeader("X-FORWARDED-FOR") !=null? request.getHeader("X-FORWARDED-FOR") :request.getRemoteAddr();
@@ -54,12 +54,12 @@ public class CampaignController {
 
             if(session.getAttribute("cIdDetail")!=null){
                 resp = "cleaning session";
-                return "redirect:"+serverPath+"/clean?r="+URLEncoder.encode(serverPath+"/cl/"+cid+"?type="+type+"&id="+id,"UTF-8");
+                return "redirect:"+serverPath+"/clean?r="+URLEncoder.encode(serverPath+"/cl/"+cid+"?type="+type+"&id="+id+"&uuid="+uuid,"UTF-8");
             }
 
-            if (type != null && type.trim().toLowerCase().matches("devid|gid") && id != null) {
-               session.setAttribute("type", type);
-                session.setAttribute("id", id);
+            if (type != null && type.trim().toLowerCase().matches("devid|gid") && ((id != null&&!"".equals(id.trim()))||(uuid!=null && !"".equals(uuid.trim())))) {
+                session.setAttribute("type", type);
+                session.setAttribute("id", (id!=null&&!"".equals(id.trim()))?id:uuid);
                 resp = "request parameter valid";
             } else {
                 resp = "request param invalid";
@@ -68,7 +68,7 @@ public class CampaignController {
         }catch(Exception e){
             logger.error(StackTrace.getRootCause(e,getClass().getName()));
         }finally{
-            logger.info("ip ["+ip+"], ua ["+ua+"], cid: "+cid+" | type: "+type+" | id: "+id+" | resp: "+resp);
+            logger.info("ip ["+ip+"], ua ["+ua+"], cid: "+cid+" | type: "+type+" | id: "+id+" | uuid: "+uuid+" | resp: "+resp);
         }
 
         return "redirect:"+serverPath+"/offer/{cid}";
